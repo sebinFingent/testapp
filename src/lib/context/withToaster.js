@@ -2,50 +2,59 @@ import React, { useState, useCallback, useRef } from "react";
 
 const toasterQueue = new ToasterQueue();
 
-export const withToaster = (Component) => (props) => {
-  const [toasts, setToasts] = useState(null);
-  const timer = useRef(null);
+export const withToaster = (Component) => {
 
-  const showToaster = useCallback((message, duration, addToQueue = false) => {
-    const id = Date.now();
-
-    // Reset timer
-    if (timer.current) {
-      clearTimeout(timer.current);
-    }
-
-    if (message) {
-      // Show toaster
-      setToasts({ id, message, duration });
-
-      timer.current = setTimeout(() => {
-        if (addToQueue) {
-          toasterQueue.next(showToaster);
-        } else {
-          // Reset toaster
-          setToasts(null);
-
-          // Continue with queue if not empty
-          if (!toasterQueue.isEmpty()) {
+  const WithToaster = (props) => {
+    const [toasts, setToasts] = useState(null);
+    const timer = useRef(null);
+  
+    const showToaster = useCallback((message, duration, addToQueue = false) => {
+      const id = Date.now();
+  
+      // Reset timer
+      if (timer.current) {
+        clearTimeout(timer.current);
+      }
+  
+      if (message) {
+        // Show toaster
+        setToasts({ id, message, duration });
+  
+        timer.current = setTimeout(() => {
+          if (addToQueue) {
             toasterQueue.next(showToaster);
+          } else {
+            // Reset toaster
+            setToasts(null);
+  
+            // Continue with queue if not empty
+            if (!toasterQueue.isEmpty()) {
+              toasterQueue.next(showToaster);
+            }
           }
-        }
-      }, duration + 500); // +500 for animation
-    } else {
-      setToasts(null);
-    }
-  }, []);
+        }, duration + 500); // +500 for animation
+      } else {
+        setToasts(null);
+      }
+    }, []);
+  
+    const addToast = useCallback((message, duration = 3000, addToQueue = false) => {
+      if (addToQueue) {
+        toasterQueue.add(message, showToaster, duration);
+      } else {
+        showToaster(message, duration, addToQueue);
+      }
+    }, [showToaster]);
+  
+  
+    return <Component {...props} addToast={addToast} toastData={toasts}/>;
+  };
 
-  const addToast = useCallback((message, duration = 3000, addToQueue = false) => {
-    if (addToQueue) {
-      toasterQueue.add(message, showToaster, duration);
-    } else {
-      showToaster(message, duration, addToQueue);
-    }
-  }, [showToaster]);
+  WithToaster.displayName = `WithToaster`;
 
-  return <Component {...props} addToast={addToast} toastData={toasts}/>;
-};
+  return WithToaster;
+}
+
 
 export default function ToasterQueue(){
     this.queue = [];

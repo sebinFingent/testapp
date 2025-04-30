@@ -80,24 +80,31 @@ const TimePicker = ({setTimerIndex = () => {},timeIndex = {hour:1,minute:1,secon
         const scrollSeconds = (e)=>onTimerScroll(e,TIMER_SECONDS)
         const scrollMeridian = (e)=>onTimerScroll(e,TIMER_MERIDIAN)
 
-        containerRefHours__scroll.current?.addEventListener('scrollend',scrollHour)
-        containerRefMinutes__scroll.current?.addEventListener('scrollend',scrollMinute)
-        containerRefSeconds__scroll.current?.addEventListener('scrollend',scrollSeconds)
-        containerRefAmPm__scroll.current?.addEventListener('scrollend',scrollMeridian)
+        const hour_ref = containerRefHours__scroll.current;
+        const minute_ref = containerRefMinutes__scroll.current;
+        const second_ref = containerRefSeconds__scroll.current;
+        const ampm_ref = containerRefAmPm__scroll.current;
+
+        hour_ref?.addEventListener('scrollend',scrollHour)
+        minute_ref?.addEventListener('scrollend',scrollMinute)
+        second_ref?.addEventListener('scrollend',scrollSeconds)
+        ampm_ref?.addEventListener('scrollend',scrollMeridian)
 
         // auto scroll to selected time
         handleAutoScrollToItem();
         
         return()=> {
-            containerRefHours__scroll.current?.removeEventListener('scrollend',scrollHour);
-            containerRefMinutes__scroll.current?.removeEventListener('scrollend',scrollMinute)
-            containerRefSeconds__scroll.current?.removeEventListener('scrollend',scrollSeconds)
-            containerRefAmPm__scroll.current?.removeEventListener('scrollend',scrollMeridian)
+            hour_ref?.removeEventListener('scrollend',scrollHour);
+            minute_ref?.removeEventListener('scrollend',scrollMinute)
+            second_ref?.removeEventListener('scrollend',scrollSeconds)
+            ampm_ref?.removeEventListener('scrollend',scrollMeridian)
         }
+    // eslint-disable-next-line
     },[])
 
     useEffect(()=> {
         setTimerIndex({...timeIndex,...getTime})
+        // eslint-disable-next-line
     },[getTime])
 
 
@@ -199,12 +206,14 @@ const TimerList = React.forwardRef((props, ref) => {
         </ul>
     )
 })
+TimerList.displayName = 'TimerList';
 
 const TimeItem = React.forwardRef(({value,index, item,onSelectScroll,selectedTimerIndex}, ref) => {
     return(
         <li onClick={()=>onSelectScroll(index,ref.current)} index={index} className={`item flex min-h-[3rem] align-middle items-center text-slate-400 scroll-centered-item cursor-pointer select-none ${selectedTimerIndex?.[item] === index?'active':''}`} value={value}>{value}</li>
     )
 })
+TimeItem.displayName = 'TimeItem';
 
 // Hours
 export const HOURS = ["12","01","02","03","04","05","06","07","08","09","10","11"];
